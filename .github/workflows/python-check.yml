@@ -74,7 +74,6 @@ jobs:
 
     env:
       PYTHON_ENV: test  # 테스트 환경 변수 설정
-      PYTHON_ENV: test
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
