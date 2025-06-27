@@ -9,7 +9,6 @@ on:
 jobs:
   lint-check:
     runs-on: ubuntu-latest
-    container: python:3.10-slim
     
     steps:
     - name: Checkout code
@@ -72,7 +71,6 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     needs: lint-check
-    container: python:3.10-slim
     
     steps:
     - name: Checkout code
