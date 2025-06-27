@@ -6,8 +6,8 @@ model-server/app/config/chatbot.conf*
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,linux,macos,python,pycharm,visualstudiocode,django,flask
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,linux,macos,python,pycharm,visualstudiocode,django,flask
-*.env.compose
 *.env
+*.env.*
 .vscode
 restfulapi/app/config/.env
 ### Django ###

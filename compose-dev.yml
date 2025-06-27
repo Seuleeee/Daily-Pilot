@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_URL: ${POSTGRES_URL}
+
+      # MongoDB
+      MONGODB_HOST: ${MONGODB_HOST}
+      MONGODB_PORT: ${MONGODB_PORT}
+      MONGODB_USERNAME: ${MONGODB_USERNAME}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      MONGODB_URL: ${MONGODB_URL}
+
+      # Mongo Express (웹 UI용)
+      ME_ADMIN: ${ME_ADMIN}
+      ME_PASSWORD: ${ME_PASSWORD}
+
+      # Redis
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_URL: ${REDIS_URL}
+
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+    depends_on:
+      - postgres
+      - mongodb
+      - redis
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    environment:
+      MONGODB_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGODB_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    volumes:
+      - mongodbdata:/data/db
+    restart: unless-stopped  # ✅ Mongo 먼저 실패해도 다시 시작됨
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    env_file: .env.dev
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGODB_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGODB_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017/
+      ME_CONFIG_BASICAUTH: true
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_ADMIN}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_ADMIN_PASS}
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  mongodbdata:
+  redisdata:
