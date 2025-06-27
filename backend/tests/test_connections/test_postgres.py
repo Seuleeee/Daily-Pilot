@@ -3,6 +3,7 @@ from sqlalchemy import text
 
 
 @pytest.mark.asyncio
+@pytest.mark.connection
 async def test_postgres_crud(pg_session):
     print("🟡 PostgreSQL: creating table")
     await pg_session.execute(text("CREATE TABLE IF NOT EXISTS test_table (id SERIAL PRIMARY KEY, name TEXT);"))

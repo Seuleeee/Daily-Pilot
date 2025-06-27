@@ -2,6 +2,7 @@ import pytest
 
 
 @pytest.mark.asyncio
+@pytest.mark.connection
 async def test_redis_crud(redis_client):
     print("🟡 Redis: setting key")
     await redis_client.set("test_key", "test_value")
