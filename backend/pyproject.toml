@@ -20,7 +20,7 @@ dependencies = [
     "psycopg2==2.9.10",
 ]
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "pre-commit>=4.2.0",
     "pytest>=8.3.5",

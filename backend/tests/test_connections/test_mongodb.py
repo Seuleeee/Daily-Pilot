@@ -2,6 +2,7 @@ import pytest
 
 
 @pytest.mark.asyncio
+@pytest.mark.connection
 async def test_mongodb_crud(mongo_collection):
     print("🟡 MongoDB: inserting document")
     await mongo_collection.insert_one({"name": "test용 입력값"})
