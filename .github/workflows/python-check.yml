@@ -117,7 +117,7 @@ jobs:
     - name: Run pytest
       run: |
         cd backend
-        PYTHON_ENV=test pytest -s -m "not connection" -c pytest.ini --allow-no-tests
+        PYTHON_ENV=test pytest -s -m "not connection" -c pytest.ini
         
     - name: Upload test results
       uses: actions/upload-artifact@v4
