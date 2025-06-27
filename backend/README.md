@@ -95,7 +95,7 @@ docker compose -f compose-dev.yml --env-file .env.dev up -d
 - Mongo Express에 접속해 정상 실행을 확인합니다.
 - `.env.dev`에 설정한, 값들을 활용해서 접속하세요.
 - `http://localhost:8081`
-![alt text](./assets/readme_mongodb.png)
+![Mongo Express](../assets/readme_mongodb.png)
 
 #### 4. Redis
 - redis를 설치하세요.

@@ -1,0 +1,20 @@
+codecov:
+  require_ci_to_pass: false  # CI 실패와 분리
+
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 5%
+        informational: true  # ✅ 실패 처리 안 함
+    patch:
+      default:
+        target: 70%
+        threshold: 0%
+        informational: true  # ✅ PR diff 기준도 실패 처리 안 함
+
+ignore:
+  - "backend/tests/*"
+  - "**/migrations/*"
+  - "**/__init__.py"
