@@ -1,4 +1,4 @@
-name: Pre-commit Checks
+name: Python Checks
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
         python-version: '3.11'  # 프로젝트에 맞는 Python 버전으로 변경
         
     - name: Cache pip dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
@@ -38,7 +38,7 @@ jobs:
         pip install pre-commit
         
     - name: Cache pre-commit hooks
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pre-commit
         key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -83,7 +83,7 @@ jobs:
         PYTHON_ENV=test pytest -s tests
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: pytest-results
