@@ -32,7 +32,7 @@ def ensure_postgres_test_db():
     conn.close()
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session")
 def setup_postgres_test_db():
     ensure_postgres_test_db()
 
