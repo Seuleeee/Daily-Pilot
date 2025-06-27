@@ -98,7 +98,6 @@ jobs:
     - name: Run pytest
       run: |
         cd backend
-        source .venv/bin/activate
         PYTHON_ENV=test pytest -s tests
         
     - name: Upload test results
