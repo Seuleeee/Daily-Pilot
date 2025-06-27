@@ -17,7 +17,7 @@ repos:
     - id: run-pytest
       name: run-pytest
       entry: bash
-      language: python
+      language: system
       types: [python]
       pass_filenames: false
       args:
