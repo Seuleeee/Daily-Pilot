@@ -71,6 +71,27 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     needs: lint-check
+
+    env:
+      PYTHON_ENV: test  # 테스트 환경 변수 설정
+      PYTHON_ENV: test
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test_db
+      POSTGRES_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
+      MONGODB_HOST: localhost
+      MONGODB_PORT: 27017
+      MONGODB_USERNAME: root
+      MONGODB_PASSWORD: example
+      MONGODB_URL: mongodb://root:example@localhost:27017/
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_URL: redis://localhost:6379/0
+      ME_ADMIN: admin
+      ME_ADMIN_PASS: adminpass
+      OPENAI_API_KEY: dummy-key
     
     steps:
     - name: Checkout code
