@@ -27,7 +27,7 @@ services:
 
       # Mongo Express (웹 UI용)
       ME_ADMIN: ${ME_ADMIN}
-      ME_PASSWORD: ${ME_PASSWORD}
+      ME_ADMIN_PASS: ${ME_ADMIN_PASS}
 
       # Redis
       REDIS_HOST: ${REDIS_HOST}
