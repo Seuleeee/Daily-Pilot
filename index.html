@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execute Workflow SSE Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 32px; }
+        h2 { margin-top: 0; }
+        #events { background: #222; color: #0f0; font-family: monospace; padding: 16px; border-radius: 4px; height: 250px; overflow-y: auto; margin-top: 16px; }
+        .status { margin-top: 12px; font-size: 14px; }
+        label { display: block; margin: 12px 0 6px; }
+        input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #aaa; }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Workflow SSE 실행 테스트</h2>
+    <form id="workflow-form">
+      <label for="task">토론 과제(task):</label>
+      <input type="text" id="task" name="task" placeholder="토론할 과제를 입력하세요" required />
+      <label for="max-rounds">최대 라운드(max_rounds):</label>
+      <input type="number" id="max-rounds" name="max-rounds" min="1" max="5" value="2" required />
+      <button type="submit">실행</button>
+    </form>
+    <div class="status" id="status">상태: 대기 중</div>
+    <div id="events"></div>
+  </div>
+  <script>
+    const form = document.getElementById('workflow-form');
+    const taskInput = document.getElementById('task');
+    const maxRoundsInput = document.getElementById('max-rounds');
+    const eventsDiv = document.getElementById('events');
+    const statusDiv = document.getElementById('status');
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const task = taskInput.value.trim();
+      const maxRounds = parseInt(maxRoundsInput.value, 10);
+      if (!task || !maxRounds) return;
+      eventsDiv.textContent = '';
+      statusDiv.textContent = '상태: 워크플로우 실행 중...';
+
+      try {
+        const res = await fetch('http://localhost:8002/api/v1/workflows/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task, max_rounds: maxRounds })
+        });
+        if (!res.ok || !res.body) throw new Error('워크플로우 실행 실패');
+        statusDiv.textContent = `상태: 워크플로우 실행됨 (스트리밍)`;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+        eventsDiv.textContent = '워크플로우 실행 중...\n';
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let lines = buffer.split(/\r?\n/);
+          buffer = lines.pop(); // 마지막 줄은 아직 끝나지 않았을 수 있음
+          for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+            // SSE 포맷: data: ...
+            if (line.startsWith('data:')) {
+              let msg = line.replace(/^data:/, '').trim();
+              try {
+                const obj = JSON.parse(msg);
+                // agent_message 타입
+                if (obj.agent && obj.type && obj.content) {
+                  eventsDiv.textContent += `[${obj.agent}] (${obj.type}): ${obj.content}\n`;
+                }
+                // 상태 업데이트 타입
+                else if (obj.status) {
+                  eventsDiv.textContent += `[상태] ${obj.status} (round: ${obj.current_round ?? ''}/${obj.max_rounds ?? ''})\n`;
+                }
+              } catch (e) {
+                eventsDiv.textContent += msg + '\n';
+              }
+            }
+          }
+          eventsDiv.scrollTop = eventsDiv.scrollHeight;
+        }
+        eventsDiv.textContent += '\n[워크플로우 스트리밍 종료]';
+        statusDiv.textContent = '상태: 스트리밍 종료';
+      } catch (err) {
+        statusDiv.textContent = '상태: 워크플로우 실행 실패';
+        eventsDiv.textContent = err.toString();
+      }
+    });
+  </script>
+</body>
+</html>
