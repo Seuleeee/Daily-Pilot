@@ -66,7 +66,7 @@ def planning_node(state: AgentState):
         """
 
     prompt = f"""
-    당신은 전문 기획자입니다. 다음 과제에 대해 구체적이고 실행 가능한 계획을 수립해주세요.
+    당신은 전문 기획자입니다. 다음 과제에 대해 간단하게 계획을 수립해주세요.
     과제: {state["task"]}
     현재 라운드: {state["round_count"]}
     {previous_context}
@@ -96,7 +96,7 @@ def research_node(state: AgentState):
     emit_message("리서처", "기획자님의 계획을 검토해보겠습니다.", "thinking")
 
     prompt = f"""
-    당신은 전문 리서처입니다. 기획자가 제시한 계획에 대해 다각도로 조사해주세요.
+    당신은 전문 리서처입니다. 기획자가 제시한 계획에 대해 간단하게 다각도로 조사해주세요.
     
     계획안: {state["plan"]}
     현재 라운드: {state["round_count"]}
@@ -127,7 +127,7 @@ def critic_node(state: AgentState):
     emit_message("비평가", "계획과 조사 내용을 꼼꼼히 살펴보겠습니다.", "thinking")
 
     prompt = f"""
-    당신은 예리한 비평가입니다. 기획자의 계획과 리서처의 조사 결과를 종합적으로 검토해주세요.
+    당신은 예리한 비평가입니다. 기획자의 계획과 리서처의 조사 결과를 종합적으로 간단하게 검토해주세요.
     
     계획안: {state["plan"]}
     조사 내용: {state["research"]}
