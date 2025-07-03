@@ -270,26 +270,3 @@ def run_discussion(task: str, max_rounds: int = 2) -> Generator[dict, None, None
     print("=" * 60)
     print("✅ 토론 완료")
     print("=" * 60)
-
-
-# -------------------- 6. 메인 실행 --------------------
-if __name__ == "__main__":
-    # 토론 실행
-    task = "사내 카페에 AI 바리스타 로봇을 도입하는 프로젝트"
-
-    # 실시간 토론 진행
-    final_result = None
-    for result in run_discussion(task, max_rounds=2):
-        final_result = result
-        # 각 단계별 상태 출력 (SSE용)
-        time.sleep(0.1)  # 약간의 딜레이로 자연스러운 대화 연출
-
-    # 최종 결과 요약
-    if final_result:
-        print("\n" + "=" * 60)
-        print("📋 최종 결과 요약")
-        print("=" * 60)
-        print(f"과제: {final_result['task']}")
-        print(f"총 라운드: {final_result['round_count']}")
-        print(f"최종 계획: {final_result.get('plan', 'N/A')}...")
-        print(f"최종 결정: {final_result.get('decision', 'N/A')}")
