@@ -3,87 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wide & Dynamic SSE Chat</title>
+    <title>Dynamic AI Debate Stage</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <style>
         :root {
             --font-family-main: 'Noto Sans KR', sans-serif;
-            --background-color: #f0f2f5;
-            --container-bg: #ffffff;
-            --chat-bg-image: linear-gradient(to bottom, #f7f7f7, #e3e3e3);
-            --my-message-bg: #87CEFA; /* Light Sky Blue */
-            --agent-left-bg: #FFFFFF;
-            --agent-right-bg: #F0E68C; /* Khaki */
-            --text-color-primary: #333333;
-            --text-color-secondary: #666666;
-            --accent-color: #4A90E2;
-            --border-color: #e0e0e0;
-            --shadow-color: rgba(0, 0, 0, 0.08);
+            --background-color: #1a1a2e;
+            --stage-bg: linear-gradient(135deg, #16213e 0%, #0f3460 50%, #16213e 100%);
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #b0bec5;
+            --accent-color: #4fc3f7;
+            --sidebar-bg: rgba(255, 255, 255, 0.95);
+            --sidebar-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: var(--font-family-main);
-            background-color: var(--background-color);
-            margin: 0;
+            background: var(--background-color);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 컨트롤 패널 */
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
             padding: 20px;
             display: flex;
-            justify-content: center;
+            gap: 20px;
             align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
         }
 
-        .container {
-            width: 100%;
-            max-width: 1100px; /* 화면 넓게 사용 */
-            background: var(--container-bg);
-            border-radius: 16px;
-            box-shadow: 0 8px 24px var(--shadow-color);
-            padding: 32px;
-            box-sizing: border-box;
+        .control-panel h2 {
+            color: var(--text-color-primary);
+            margin-right: auto;
+            font-size: 24px;
+        }
+
+        .control-group {
             display: flex;
             flex-direction: column;
+            gap: 5px;
         }
 
-        h2 {
-            text-align: center;
-            color: var(--text-color-primary);
-            margin-top: 0;
-            margin-bottom: 24px;
-        }
-        
-        /* Form & Controls */
-        #workflow-form {
-            display: grid;
-            grid-template-columns: 1fr auto auto;
-            gap: 16px;
-            align-items: flex-end;
-            margin-bottom: 24px;
-        }
-        
-        #workflow-form div { flex-grow: 1; }
-
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
+        .control-group label {
             color: var(--text-color-secondary);
-            font-size: 14px;
+            font-size: 12px;
+            font-weight: 500;
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-sizing: border-box;
+        .control-group input {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color-primary);
             font-family: var(--font-family-main);
-            font-size: 16px;
         }
 
-        button {
+        .control-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .start-btn {
             padding: 12px 24px;
             background: var(--accent-color);
             color: white;
@@ -92,205 +91,531 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 700;
-            transition: background-color 0.3s, transform 0.1s;
-            height: 47.6px; /* input 높이와 맞춤 */
-        }
-        button:hover { background: #357ABD; }
-        button:active { transform: scale(0.98); }
-        button:disabled { background: #aaa; cursor: not-allowed; }
-
-        /* Chat Area */
-        #chat-container {
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            flex-grow: 1; /* 남은 공간 모두 차지 */
-            display: flex;
-            flex-direction: column;
+            transition: all 0.3s;
         }
 
-        #status-bar {
-            padding: 10px 16px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-color-secondary);
+        .start-btn:hover {
+            background: #29b6f6;
+            transform: translateY(-2px);
+        }
+
+        .start-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 상태 표시 */
+        .status-indicator {
+            position: absolute;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--text-color-primary);
+            padding: 10px 20px;
+            border-radius: 20px;
             font-size: 14px;
-            text-align: center;
-            flex-shrink: 0;
+            z-index: 50;
         }
 
-        #chat-window {
-            height: 60vh; /* 화면 높이에 따라 유연하게 조절 */
-            background-image: var(--chat-bg-image);
+        /* 메인 스테이지 */
+        .main-stage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--stage-bg);
+            transition: width 0.5s ease;
+        }
+
+        .main-stage.sidebar-open {
+            width: 70%;
+        }
+
+        /* 무대 영역 */
+        .debate-stage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             padding: 20px;
-            overflow-y: auto;
+            overflow: hidden;
+        }
+
+        /* 캐릭터 */
+        .character-container {
+            position: absolute;
+            bottom: 50px;
+            transform: translateX(-50%);
+            width: 120px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .message-wrapper {
-            display: flex;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .message-wrapper.left { justify-content: flex-start; }
-        .message-wrapper.right { justify-content: flex-end; }
-
-        .message {
-            display: flex;
-            align-items: flex-end;
+            align-items: center;
             gap: 12px;
-            max-width: 75%;
+            will-change: transform, opacity;
         }
-
-        .message-wrapper.right .message { flex-direction: row-reverse; }
 
         .avatar {
-            width: 44px;
-            height: 44px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            flex-shrink: 0;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .character-container.speaking .avatar {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(79, 195, 247, 0.6);
+        }
+
+        .agent-name-plate {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(5px);
+        }
+
+        /* 말풍선 */
+        .speech-bubble {
+            position: absolute;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 20px;
+            max-width: 350px;
+            min-width: 200px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateX(-50%);
+            will-change: transform, opacity;
+            line-height: 1.6;
+            font-size: 15px;
+            z-index: 20;
+            border: 2px solid rgba(79, 195, 247, 0.3);
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border: 15px solid transparent;
+            border-top-color: white;
+            border-bottom: 0;
+        }
+
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border: 17px solid transparent;
+            border-top-color: rgba(79, 195, 247, 0.3);
+            border-bottom: 0;
+            z-index: -1;
+        }
+
+        /* 히스토리 사이드바 */
+        .history-sidebar {
+            position: absolute;
+            top: 0;
+            right: -30%;
+            width: 30%;
+            height: 100%;
+            background: var(--sidebar-bg);
+            box-shadow: var(--sidebar-shadow);
+            transition: right 0.5s ease;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h3 {
+            color: #333;
+            font-size: 18px;
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
             font-size: 24px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            color: #666;
+        }
+
+        .history-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .round-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .round-header {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .message-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
         }
 
         .message-content {
-            padding: 12px 16px;
-            border-radius: 18px;
-            position: relative;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            flex: 1;
         }
-        
-        .message-content p { margin: 0; white-space: pre-wrap; line-height: 1.6; }
-        .agent-name { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
 
-        /* Bubble Styles */
-        .message-wrapper.left .message-content { background-color: var(--agent-left-bg); border-top-left-radius: 6px; }
-        .message-wrapper.right .message-content { background-color: var(--my-message-bg); border-top-right-radius: 6px; }
-        .message-wrapper.right.agent-right .message-content { background-color: var(--agent-right-bg); }
+        .message-agent {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
 
+        .message-text {
+            color: #666;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        /* 라운드 표시 */
+        .round-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 72px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .main-stage.sidebar-open {
+                width: 60%;
+            }
+
+            .history-sidebar {
+                width: 40%;
+                right: -40%;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="control-panel">
     <h2>AI Debate Arena 🏟️</h2>
-    <form id="workflow-form">
-        <div>
-            <label for="task">Debate Topic</label>
-            <input type="text" id="task" name="task" value="Is social media beneficial for society?" required />
-        </div>
-        <div>
-            <label for="max-rounds">Rounds</label>
-            <input type="number" id="max-rounds" name="max-rounds" min="1" max="10" value="3" required />
-        </div>
-        <button type="submit" id="submit-btn">Start Debate</button>
-    </form>
+    <div class="control-group">
+        <label>Debate Topic</label>
+        <input type="text" id="task" value="Is social media beneficial for society?" />
+    </div>
+    <div class="control-group">
+        <label>Rounds</label>
+        <input type="number" id="max-rounds" min="1" max="10" value="3" />
+    </div>
+    <button class="start-btn" id="submit-btn">Start Debate</button>
+</div>
 
-    <div id="chat-container">
-        <div id="status-bar">Status: Waiting</div>
-        <div id="chat-window">
-            </div>
+<div class="status-indicator" id="status-bar">Status: Ready to debate</div>
+
+<div class="main-stage" id="main-stage">
+    <div class="debate-stage" id="debate-stage">
+        <div class="round-indicator" id="round-indicator">Round 1</div>
+    </div>
+</div>
+
+<div class="history-sidebar" id="history-sidebar">
+    <div class="sidebar-header">
+        <h3>Debate History</h3>
+        <button class="close-sidebar" id="close-sidebar">×</button>
+    </div>
+    <div class="history-content" id="history-content">
+        <!-- 히스토리가 여기에 추가됩니다 -->
     </div>
 </div>
 
 <script>
-    const form = document.getElementById('workflow-form');
     const taskInput = document.getElementById('task');
     const maxRoundsInput = document.getElementById('max-rounds');
-    const chatWindow = document.getElementById('chat-window');
+    const debateStage = document.getElementById('debate-stage');
     const statusBar = document.getElementById('status-bar');
     const submitBtn = document.getElementById('submit-btn');
+    const mainStage = document.getElementById('main-stage');
+    const historySidebar = document.getElementById('history-sidebar');
+    const historyContent = document.getElementById('history-content');
+    const closeSidebar = document.getElementById('close-sidebar');
+    const roundIndicator = document.getElementById('round-indicator');
 
-    // --- Dynamic Profile Generation ---
+    // 프로필 및 상태 관리
     const iconPool = ['👩‍🚀', '🕵️‍♀️', '👨‍🎨', '👩‍💻', '👨‍🍳', '👩‍🔬', '👨‍🎤', '🤹‍♀️', '👩‍🏫', '👨‍⚖️'];
     const colorPool = ['#ff6b6b', '#f06595', '#cc5de8', '#845ef7', '#5c7cfa', '#339af0', '#22b8cf', '#20c997', '#51cf66', '#fcc419'];
     let nextProfileIndex = 0;
     
-    // agentProfiles는 캐시 역할을 하여 한 번 생성된 프로필을 저장합니다.
     const agentProfiles = {
         'Moderator': { icon: '🧑‍⚖️', color: '#6c757d' },
-        'You': { icon: '👤', color: '#4A90E2' },
+        'You': { icon: '👤', color: '#4fc3f7' },
     };
+
+    let agentsOnStage = new Map();
+    let currentRound = 1;
+    let roundHistory = [];
+    let currentRoundMessages = [];
+    let activeBubble = null;
+
+    const characterPositions = ["20%", "80%", "50%", "15%", "85%"];
 
     const getAgentProfile = (agentName) => {
         if (agentProfiles[agentName]) {
             return agentProfiles[agentName];
         }
-        
-        // 새로운 에이전트일 경우, 풀에서 새 프로필을 동적으로 생성
         const profile = {
             icon: iconPool[nextProfileIndex % iconPool.length],
             color: colorPool[nextProfileIndex % colorPool.length]
         };
         nextProfileIndex++;
-        
-        agentProfiles[agentName] = profile; // 생성된 프로필을 캐시에 저장
+        agentProfiles[agentName] = profile;
         return profile;
     };
 
-    // --- Chat Logic ---
-    let lastAgentSide = 'right'; // AI 에이전트의 마지막 위치 (left, right)
-
-    const addMessageToChat = (agent, content) => {
-        const profile = getAgentProfile(agent);
+    const showDialogue = async (agent, content) => {
+        // 현재 라운드 메시지에 추가
+        currentRoundMessages.push({ agent, content, timestamp: new Date() });
         
-        // 'You'는 항상 오른쪽, 다른 에이전트는 번갈아가며 위치
-        let side;
-        if (agent === 'You') {
-            side = 'right';
-        } else {
-            side = (lastAgentSide === 'right') ? 'left' : 'right';
-            lastAgentSide = side; // 마지막 위치 업데이트
-        }
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = `message-wrapper ${side}`;
-        if (side === 'right' && agent !== 'You') {
-            wrapper.classList.add('agent-right');
-        }
+        let agentData = agentsOnStage.get(agent);
 
-        wrapper.innerHTML = `
-            <div class="message">
+        // 새로운 캐릭터 추가
+        if (!agentData) {
+            const profile = getAgentProfile(agent);
+            const position = characterPositions[agentsOnStage.size % characterPositions.length];
+            
+            const characterEl = document.createElement('div');
+            characterEl.className = 'character-container';
+            characterEl.style.left = position;
+            characterEl.dataset.agent = agent;
+            
+            characterEl.innerHTML = `
                 <div class="avatar" style="background-color: ${profile.color};">${profile.icon}</div>
-                <div class="message-content">
-                    <div class="agent-name" style="color: ${profile.color}">${agent}</div>
-                    <p>${content.replace(/\n/g, '<br>')}</p>
-                </div>
-            </div>
-        `;
+                <div class="agent-name-plate">${agent}</div>
+            `;
+            
+            debateStage.appendChild(characterEl);
+            
+            agentData = { el: characterEl, profile, position };
+            agentsOnStage.set(agent, agentData);
+
+            // 등장 애니메이션
+            anime({
+                targets: characterEl,
+                bottom: [-50, 50],
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutElastic(1, .8)'
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 600));
+        }
+
+        // 발언자 강조
+        const allCharacters = document.querySelectorAll('.character-container');
+        allCharacters.forEach(char => {
+            if (char.dataset.agent === agent) {
+                char.classList.add('speaking');
+            } else {
+                char.classList.remove('speaking');
+            }
+        });
+
+        // 기존 말풍선 제거
+        if (activeBubble) {
+            await anime({
+                targets: activeBubble,
+                opacity: 0,
+                scale: 0.8,
+                duration: 300,
+                easing: 'easeInQuad'
+            }).finished;
+            if (activeBubble.parentNode) {
+                activeBubble.remove();
+            }
+        }
+
+        // 새 말풍선 생성
+        const bubble = document.createElement('div');
+        bubble.className = 'speech-bubble';
+        bubble.innerHTML = `<p style="margin: 0;">${content.replace(/\n/g, '<br>')}</p>`;
         
-        chatWindow.appendChild(wrapper);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
+        bubble.style.opacity = '0';
+        bubble.style.left = agentData.position;
+        debateStage.appendChild(bubble);
+        
+        // 위치 계산
+        const bubbleHeight = bubble.offsetHeight;
+        const bubbleTop = debateStage.offsetHeight - 50 - 120 - bubbleHeight - 30;
+        bubble.style.top = `${Math.max(200, bubbleTop)}px`;
+        
+        activeBubble = bubble;
+
+        // 등장 애니메이션
+        anime({
+            targets: bubble,
+            opacity: [0, 1],
+            scale: [0.8, 1],
+            translateY: [20, 0],
+            duration: 600,
+            easing: 'easeOutBack'
+        });
     };
-    
-    // --- SSE Connection ---
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
+
+    const updateRoundIndicator = (round) => {
+        roundIndicator.textContent = `Round ${round}`;
+        anime({
+            targets: roundIndicator,
+            scale: [1.2, 1],
+            opacity: [0.3, 0.1],
+            duration: 1000,
+            easing: 'easeOutQuad'
+        });
+    };
+
+    const showRoundHistory = () => {
+        if (currentRoundMessages.length > 0) {
+            roundHistory.push({
+                round: currentRound - 1,
+                messages: [...currentRoundMessages]
+            });
+            currentRoundMessages = [];
+        }
+
+        // 히스토리 컨텐츠 업데이트
+        historyContent.innerHTML = '';
+        
+        roundHistory.forEach(roundData => {
+            const roundSection = document.createElement('div');
+            roundSection.className = 'round-section';
+            
+            const roundHeader = document.createElement('div');
+            roundHeader.className = 'round-header';
+            roundHeader.textContent = `Round ${roundData.round}`;
+            roundSection.appendChild(roundHeader);
+            
+            roundData.messages.forEach(msg => {
+                const profile = getAgentProfile(msg.agent);
+                const messageRow = document.createElement('div');
+                messageRow.className = 'message-row';
+                
+                messageRow.innerHTML = `
+                    <div class="message-avatar" style="background-color: ${profile.color};">${profile.icon}</div>
+                    <div class="message-content">
+                        <div class="message-agent">${msg.agent}</div>
+                        <div class="message-text">${msg.content}</div>
+                    </div>
+                `;
+                
+                roundSection.appendChild(messageRow);
+            });
+            
+            historyContent.appendChild(roundSection);
+        });
+
+        // 사이드바 열기
+        historySidebar.classList.add('open');
+        mainStage.classList.add('sidebar-open');
+    };
+
+    // 사이드바 닫기
+    closeSidebar.addEventListener('click', () => {
+        historySidebar.classList.remove('open');
+        mainStage.classList.remove('sidebar-open');
+    });
+
+    // 메인 로직
+    submitBtn.addEventListener('click', async function() {
         const task = taskInput.value.trim();
         const maxRounds = parseInt(maxRoundsInput.value, 10);
         if (!task || !maxRounds) return;
         
         // 초기화
-        chatWindow.innerHTML = '';
-        statusBar.textContent = 'Status: Preparing workflow...';
+        debateStage.innerHTML = '<div class="round-indicator" id="round-indicator">Round 1</div>';
+        document.getElementById('round-indicator').textContent = 'Round 1';
+        agentsOnStage.clear();
+        currentRound = 1;
+        roundHistory = [];
+        currentRoundMessages = [];
+        activeBubble = null;
+        statusBar.textContent = 'Status: Starting debate...';
         submitBtn.disabled = true;
-        lastAgentSide = 'right';
-        Object.keys(agentProfiles).forEach(key => { // 캐시 초기화 (You, Moderator 제외)
+        
+        // 사이드바 닫기
+        historySidebar.classList.remove('open');
+        mainStage.classList.remove('sidebar-open');
+        
+        Object.keys(agentProfiles).forEach(key => {
             if (key !== 'You' && key !== 'Moderator') delete agentProfiles[key];
         });
         nextProfileIndex = 0;
         
-        addMessageToChat('You', `Let's start the debate on:\n"${task}"`);
+        await showDialogue('You', `Let's start the debate on:<br>"${task}"`);
 
         try {
             const res = await fetch('http://localhost:8002/api/v1/workflows/execute', {
@@ -301,7 +626,7 @@
 
             if (!res.ok || !res.body) throw new Error(`Workflow execution failed (HTTP ${res.status})`);
             
-            statusBar.textContent = 'Status: Streaming data...';
+            statusBar.textContent = 'Status: Debate in progress...';
             const reader = res.body.getReader();
             const decoder = new TextDecoder('utf-8');
             let buffer = '';
@@ -322,24 +647,35 @@
                         const data = JSON.parse(msg);
 
                         if (data.agent && data.type && data.content) {
-                            addMessageToChat(data.agent, data.content);
+                            await showDialogue(data.agent, data.content);
                         } else if (data.status) {
                             const roundInfo = (data.current_round && data.max_rounds) 
                                 ? ` | Round: ${data.current_round}/${data.max_rounds}` 
                                 : '';
                             statusBar.textContent = `Status: ${data.status}${roundInfo}`;
+                            
+                            // 라운드 변경 감지
+                            if (data.current_round && data.current_round > currentRound) {
+                                showRoundHistory();
+                                currentRound = data.current_round;
+                                updateRoundIndicator(currentRound);
+                            }
                         }
                     } catch (err) {
                         console.error("JSON Parsing Error:", msg, err);
-                        addMessageToChat('System', `Received a malformed message: ${msg}`);
+                        await showDialogue('System', `Received a malformed message.`);
                     }
                 }
             }
-            statusBar.textContent = 'Status: Debate Concluded. All messages received.';
+            
+            // 마지막 라운드 히스토리 추가
+            showRoundHistory();
+            statusBar.textContent = 'Status: Debate concluded!';
+            
         } catch (err) {
             console.error(err);
             statusBar.textContent = `Status: Connection Error - ${err.message}`;
-            addMessageToChat('System', `Failed to connect. Is the server running?\n(${err.message})`);
+            await showDialogue('System', `Failed to connect. Is the server running?`);
         } finally {
             submitBtn.disabled = false;
         }
