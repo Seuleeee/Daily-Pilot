@@ -344,6 +344,31 @@
             z-index: 1;
         }
 
+        .character-container {
+            position: absolute;
+            width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            will-change: transform, opacity;
+            transition: left 0.8s ease-in-out, top 0.8s ease-in-out, transform 0.8s ease-in-out;
+        }
+
+        .character-container.awaiting {
+            left: 5%;
+            opacity: 0.6;
+            transform: scale(1);
+            }
+
+        .character-container.speaking {
+            left: 50% !important;
+            top: 60% !important;
+            opacity: 1 !important;
+            transform: translateX(-50%) scale(1.2);
+            z-index: 10;
+        }
+
         /* 반응형 */
         @media (max-width: 768px) {
             .control-panel {
@@ -438,93 +463,81 @@
         return profile;
     };
 
-    const showDialogue = async (agent, content) => {
-        // 현재 라운드 메시지에 추가
-        currentRoundMessages.push({ agent, content, timestamp: new Date() });
-        
-        let agentData = agentsOnStage.get(agent);
+        const showDialogue = async (agent, content) => {
+      currentRoundMessages.push({ agent, content, timestamp: new Date() });
+      let agentData = agentsOnStage.get(agent);
 
-        // 새로운 캐릭터 추가
-        if (!agentData) {
-            const profile = getAgentProfile(agent);
-            const position = characterPositions[agentsOnStage.size % characterPositions.length];
-            
-            const characterEl = document.createElement('div');
-            characterEl.className = 'character-container';
-            characterEl.style.left = position;
-            characterEl.dataset.agent = agent;
-            
-            characterEl.innerHTML = `
-                <div class="avatar" style="background-color: ${profile.color};">${profile.icon}</div>
-                <div class="agent-name-plate">${agent}</div>
-            `;
-            
-            debateStage.appendChild(characterEl);
-            
-            agentData = { el: characterEl, profile, position };
-            agentsOnStage.set(agent, agentData);
+      if (!agentData) {
+        const profile = getAgentProfile(agent);
+        const characterEl = document.createElement('div');
+        characterEl.className = 'character-container awaiting';
+        characterEl.style.left = '5%';
+        characterEl.style.top = `${80 + agentsOnStage.size * 120}px`;
+        characterEl.dataset.agent = agent;
 
-            // 등장 애니메이션
-            anime({
-                targets: characterEl,
-                bottom: [-50, 50],
-                opacity: [0, 1],
-                duration: 800,
-                easing: 'easeOutElastic(1, .8)'
-            });
-            
-            await new Promise(resolve => setTimeout(resolve, 600));
-        }
+        characterEl.innerHTML = `
+          <div class="avatar" style="background-color: ${profile.color};">${profile.icon}</div>
+          <div class="agent-name-plate">${agent}</div>
+        `;
 
-        // 발언자 강조
-        const allCharacters = document.querySelectorAll('.character-container');
-        allCharacters.forEach(char => {
-            if (char.dataset.agent === agent) {
-                char.classList.add('speaking');
-            } else {
-                char.classList.remove('speaking');
-            }
-        });
+        debateStage.appendChild(characterEl);
+        agentData = { el: characterEl, profile };
+        agentsOnStage.set(agent, agentData);
 
-        // 기존 말풍선 제거
-        if (activeBubble) {
-            await anime({
-                targets: activeBubble,
-                opacity: 0,
-                scale: 0.8,
-                duration: 300,
-                easing: 'easeInQuad'
-            }).finished;
-            if (activeBubble.parentNode) {
-                activeBubble.remove();
-            }
-        }
-
-        // 새 말풍선 생성
-        const bubble = document.createElement('div');
-        bubble.className = 'speech-bubble';
-        bubble.innerHTML = `<p style="margin: 0;">${content.replace(/\n/g, '<br>')}</p>`;
-        
-        bubble.style.opacity = '0';
-        bubble.style.left = agentData.position;
-        debateStage.appendChild(bubble);
-        
-        // 위치 계산
-        const bubbleHeight = bubble.offsetHeight;
-        const bubbleTop = debateStage.offsetHeight - 50 - 120 - bubbleHeight - 30;
-        bubble.style.top = `${Math.max(200, bubbleTop)}px`;
-        
-        activeBubble = bubble;
-
-        // 등장 애니메이션
         anime({
-            targets: bubble,
-            opacity: [0, 1],
-            scale: [0.8, 1],
-            translateY: [20, 0],
-            duration: 600,
-            easing: 'easeOutBack'
+          targets: characterEl,
+          opacity: [0, 0.6],
+          duration: 800,
+          easing: 'easeOutElastic(1, .8)'
         });
+        await new Promise(resolve => setTimeout(resolve, 600));
+      }
+
+      const allCharacters = document.querySelectorAll('.character-container');
+      allCharacters.forEach(char => {
+        if (char.dataset.agent === agent) {
+          char.classList.remove('awaiting');
+          char.classList.add('speaking');
+        } else {
+          char.classList.remove('speaking');
+          char.classList.add('awaiting');
+        }
+      });
+
+      if (activeBubble) {
+        await anime({
+          targets: activeBubble,
+          opacity: 0,
+          scale: 0.8,
+          duration: 300,
+          easing: 'easeInQuad'
+        }).finished;
+        if (activeBubble.parentNode) {
+          activeBubble.remove();
+        }
+      }
+
+      const bubble = document.createElement('div');
+      bubble.className = 'speech-bubble';
+      bubble.innerHTML = `<p style="margin: 0;">${content.replace(/\n/g, '<br>')}</p>`;
+      bubble.style.opacity = '0';
+      bubble.style.left = '50%';
+      debateStage.appendChild(bubble);
+
+      const bubbleHeight = bubble.offsetHeight;
+      const bubbleTop = debateStage.offsetHeight * 0.25;
+      bubble.style.top = `${bubbleTop}px`;
+
+      activeBubble = bubble;
+
+      anime({
+        targets: bubble,
+        opacity: [0, 1],
+        scale: [0.8, 1],
+        translateY: [20, 0],
+        duration: 600,
+        easing: 'easeOutBack'
+      });
     };
 
     const updateRoundIndicator = (round) => {
