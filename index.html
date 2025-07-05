@@ -18,6 +18,7 @@
             --accent-color: #4fc3f7;
             --sidebar-bg: rgba(255, 255, 255, 0.95);
             --sidebar-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+            --header-height: 100px;
         }
 
         * {
@@ -36,18 +37,18 @@
 
         /* 컨트롤 패널 */
         .control-panel {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(10px);
-            border-radius: 12px;
             padding: 20px;
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
+            height: var(--header-height);
         }
 
         .control-panel h2 {
@@ -82,10 +83,8 @@
             border-color: var(--accent-color);
         }
 
-        .start-btn {
+        .start-btn, .history-btn {
             padding: 12px 24px;
-            background: var(--accent-color);
-            color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -94,21 +93,32 @@
             transition: all 0.3s;
         }
 
+        .start-btn {
+            background: var(--accent-color);
+            color: white;
+        }
         .start-btn:hover {
             background: #29b6f6;
             transform: translateY(-2px);
         }
-
         .start-btn:disabled {
             background: #666;
             cursor: not-allowed;
             transform: none;
         }
+        
+        .history-btn {
+            background: #6c757d;
+            color: white;
+        }
+        .history-btn:hover {
+            background: #5a6268;
+        }
 
         /* 상태 표시 */
         .status-indicator {
             position: absolute;
-            top: 120px;
+            top: calc(var(--header-height) + 20px);
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
@@ -128,6 +138,7 @@
             height: 100%;
             background: var(--stage-bg);
             transition: width 0.5s ease;
+            padding-top: var(--header-height);
         }
 
         .main-stage.sidebar-open {
@@ -136,11 +147,9 @@
 
         /* 무대 영역 */
         .debate-stage {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: relative;
+            width: 100%;
+            height: 100%;
             padding: 20px;
             overflow: hidden;
         }
@@ -148,7 +157,6 @@
         /* 캐릭터 */
         .character-container {
             position: absolute;
-            bottom: 50px;
             transform: translateX(-50%);
             width: 120px;
             display: flex;
@@ -156,6 +164,7 @@
             align-items: center;
             gap: 12px;
             will-change: transform, opacity;
+            transition: left 0.8s ease-in-out, top 0.8s ease-in-out, transform 0.8s ease-in-out;
         }
 
         .avatar {
@@ -186,16 +195,19 @@
             backdrop-filter: blur(5px);
         }
 
-        /* 말풍선 */
+        /* 말풍선 - 수정됨 */
         .speech-bubble {
             position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 25px;
             background: white;
             padding: 20px 25px;
             border-radius: 20px;
-            max-width: 350px;
-            min-width: 200px;
+            max-width: 500px; /* 너비 확장 */
+            min-width: 250px; /* 최소 너비 조정 */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transform: translateX(-50%);
             will-change: transform, opacity;
             line-height: 1.6;
             font-size: 15px;
@@ -232,7 +244,7 @@
 
         /* 히스토리 사이드바 */
         .history-sidebar {
-            position: absolute;
+            position: fixed;
             top: 0;
             right: -30%;
             width: 30%;
@@ -243,6 +255,7 @@
             z-index: 30;
             display: flex;
             flex-direction: column;
+            padding-top: var(--header-height);
         }
 
         .history-sidebar.open {
@@ -277,11 +290,15 @@
             padding: 20px;
         }
 
+        .round-section, .message-row {
+             background: white;
+             border-radius: 8px;
+             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
         .round-section {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             padding: 15px;
-            background: #f9f9f9;
-            border-radius: 10px;
             border-left: 4px solid var(--accent-color);
         }
 
@@ -290,6 +307,8 @@
             color: #333;
             margin-bottom: 15px;
             font-size: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
         }
 
         .message-row {
@@ -297,10 +316,10 @@
             align-items: flex-start;
             gap: 12px;
             margin-bottom: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+        }
+        .message-row:last-child {
+            margin-bottom: 0;
         }
 
         .message-avatar {
@@ -329,6 +348,8 @@
             color: #666;
             line-height: 1.5;
             font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         /* 라운드 표시 */
@@ -344,26 +365,17 @@
             z-index: 1;
         }
 
-        .character-container {
-            position: absolute;
-            width: 120px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            will-change: transform, opacity;
-            transition: left 0.8s ease-in-out, top 0.8s ease-in-out, transform 0.8s ease-in-out;
-        }
-
         .character-container.awaiting {
             left: 5%;
             opacity: 0.6;
             transform: scale(1);
-            }
-
+            bottom: 50px;
+        }
+        
+        /* 발표자 위치 수정 */
         .character-container.speaking {
             left: 50% !important;
-            top: 60% !important;
+            top: 60% !important; /* Y축 위치를 60%로 조정하여 말풍선 공간 확보 */
             opacity: 1 !important;
             transform: translateX(-50%) scale(1.2);
             z-index: 10;
@@ -374,6 +386,7 @@
             .control-panel {
                 flex-direction: column;
                 gap: 15px;
+                height: auto;
             }
 
             .main-stage.sidebar-open {
@@ -400,6 +413,7 @@
         <input type="number" id="max-rounds" min="1" max="10" value="3" />
     </div>
     <button class="start-btn" id="submit-btn">Start Debate</button>
+    <button class="history-btn" id="history-btn">📜 History</button>
 </div>
 
 <div class="status-indicator" id="status-bar">Status: Ready to debate</div>
@@ -416,11 +430,11 @@
         <button class="close-sidebar" id="close-sidebar">×</button>
     </div>
     <div class="history-content" id="history-content">
-        <!-- 히스토리가 여기에 추가됩니다 -->
-    </div>
+        </div>
 </div>
 
 <script>
+    const historyBtn = document.getElementById('history-btn');
     const taskInput = document.getElementById('task');
     const maxRoundsInput = document.getElementById('max-rounds');
     const debateStage = document.getElementById('debate-stage');
@@ -430,9 +444,7 @@
     const historySidebar = document.getElementById('history-sidebar');
     const historyContent = document.getElementById('history-content');
     const closeSidebar = document.getElementById('close-sidebar');
-    const roundIndicator = document.getElementById('round-indicator');
-
-    // 프로필 및 상태 관리
+    
     const iconPool = ['👩‍🚀', '🕵️‍♀️', '👨‍🎨', '👩‍💻', '👨‍🍳', '👩‍🔬', '👨‍🎤', '🤹‍♀️', '👩‍🏫', '👨‍⚖️'];
     const colorPool = ['#ff6b6b', '#f06595', '#cc5de8', '#845ef7', '#5c7cfa', '#339af0', '#22b8cf', '#20c997', '#51cf66', '#fcc419'];
     let nextProfileIndex = 0;
@@ -448,8 +460,6 @@
     let currentRoundMessages = [];
     let activeBubble = null;
 
-    const characterPositions = ["20%", "80%", "50%", "15%", "85%"];
-
     const getAgentProfile = (agentName) => {
         if (agentProfiles[agentName]) {
             return agentProfiles[agentName];
@@ -463,7 +473,7 @@
         return profile;
     };
 
-        const showDialogue = async (agent, content) => {
+    const showDialogue = async (agent, content) => {
       currentRoundMessages.push({ agent, content, timestamp: new Date() });
       let agentData = agentsOnStage.get(agent);
 
@@ -472,7 +482,6 @@
         const characterEl = document.createElement('div');
         characterEl.className = 'character-container awaiting';
         characterEl.style.left = '5%';
-        characterEl.style.top = `${80 + agentsOnStage.size * 120}px`;
         characterEl.dataset.agent = agent;
 
         characterEl.innerHTML = `
@@ -493,8 +502,7 @@
         await new Promise(resolve => setTimeout(resolve, 600));
       }
 
-      const allCharacters = document.querySelectorAll('.character-container');
-      allCharacters.forEach(char => {
+      document.querySelectorAll('.character-container').forEach(char => {
         if (char.dataset.agent === agent) {
           char.classList.remove('awaiting');
           char.classList.add('speaking');
@@ -521,13 +529,8 @@
       bubble.className = 'speech-bubble';
       bubble.innerHTML = `<p style="margin: 0;">${content.replace(/\n/g, '<br>')}</p>`;
       bubble.style.opacity = '0';
-      bubble.style.left = '50%';
-      debateStage.appendChild(bubble);
-
-      const bubbleHeight = bubble.offsetHeight;
-      const bubbleTop = debateStage.offsetHeight * 0.25;
-      bubble.style.top = `${bubbleTop}px`;
-
+      
+      agentData.el.appendChild(bubble);
       activeBubble = bubble;
 
       anime({
@@ -541,6 +544,7 @@
     };
 
     const updateRoundIndicator = (round) => {
+        const roundIndicator = document.getElementById('round-indicator');
         roundIndicator.textContent = `Round ${round}`;
         anime({
             targets: roundIndicator,
@@ -551,19 +555,15 @@
         });
     };
 
-    const showRoundHistory = () => {
-        if (currentRoundMessages.length > 0) {
-            roundHistory.push({
-                round: currentRound - 1,
-                messages: [...currentRoundMessages]
-            });
-            currentRoundMessages = [];
-        }
-
-        // 히스토리 컨텐츠 업데이트
+    const updateHistoryContent = () => {
         historyContent.innerHTML = '';
         
-        roundHistory.forEach(roundData => {
+        const allHistory = [...roundHistory];
+        if (currentRoundMessages.length > 0) {
+            allHistory.push({ round: currentRound, messages: [...currentRoundMessages] });
+        }
+
+        allHistory.forEach(roundData => {
             const roundSection = document.createElement('div');
             roundSection.className = 'round-section';
             
@@ -590,36 +590,35 @@
             
             historyContent.appendChild(roundSection);
         });
-
-        // 사이드바 열기
+        historyContent.scrollTop = historyContent.scrollHeight;
+    };
+    
+    historyBtn.addEventListener('click', () => {
+        updateHistoryContent();
         historySidebar.classList.add('open');
         mainStage.classList.add('sidebar-open');
-    };
+    });
 
-    // 사이드바 닫기
     closeSidebar.addEventListener('click', () => {
         historySidebar.classList.remove('open');
         mainStage.classList.remove('sidebar-open');
     });
 
-    // 메인 로직
     submitBtn.addEventListener('click', async function() {
         const task = taskInput.value.trim();
         const maxRounds = parseInt(maxRoundsInput.value, 10);
         if (!task || !maxRounds) return;
         
-        // 초기화
-        debateStage.innerHTML = '<div class="round-indicator" id="round-indicator">Round 1</div>';
-        document.getElementById('round-indicator').textContent = 'Round 1';
+        debateStage.innerHTML = '<div class="round-indicator" id="round-indicator"></div>';
         agentsOnStage.clear();
         currentRound = 1;
+        updateRoundIndicator(currentRound);
         roundHistory = [];
         currentRoundMessages = [];
         activeBubble = null;
         statusBar.textContent = 'Status: Starting debate...';
         submitBtn.disabled = true;
         
-        // 사이드바 닫기
         historySidebar.classList.remove('open');
         mainStage.classList.remove('sidebar-open');
         
@@ -667,9 +666,9 @@
                                 : '';
                             statusBar.textContent = `Status: ${data.status}${roundInfo}`;
                             
-                            // 라운드 변경 감지
                             if (data.current_round && data.current_round > currentRound) {
-                                showRoundHistory();
+                                roundHistory.push({ round: currentRound, messages: [...currentRoundMessages] });
+                                currentRoundMessages = [];
                                 currentRound = data.current_round;
                                 updateRoundIndicator(currentRound);
                             }
@@ -681,9 +680,10 @@
                 }
             }
             
-            // 마지막 라운드 히스토리 추가
-            showRoundHistory();
             statusBar.textContent = 'Status: Debate concluded!';
+            updateHistoryContent();
+            historySidebar.classList.add('open');
+            mainStage.classList.add('sidebar-open');
             
         } catch (err) {
             console.error(err);
